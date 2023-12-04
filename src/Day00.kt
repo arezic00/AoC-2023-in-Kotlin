@@ -16,4 +16,6 @@ fun main() {
     part2(input).println()
 }
 
+class Day00 {
 
+}
