@@ -2,22 +2,13 @@ import kotlin.math.pow
 
 data class Card(val id: Int, val winningNumbers: List<Int>, val numbers: List<Int>)
 fun main() {
-    fun part1(input: List<String>): Int {
-        return Day04(input).solvePart1()
-    }
+    val test = Day04(readInput("Day04_test"))
+    check(test.part1() == 13)
+    check(test.part2() == 30)
 
-    fun part2(input: List<String>): Int {
-        return Day04(input).solvePart2()
-    }
-
-    // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day04_test")
-    check(part1(testInput) == 13)
-    check(part2(testInput) == 30)
-
-    val input = readInput("Day04")
-    part1(input).println()
-    //part2(input).println()
+    val solution = Day04(readInput("Day04"))
+    solution.part1().println()
+    solution.part2().println()
 }
 
 class Day04(lines: List<String>) {
@@ -40,23 +31,11 @@ class Day04(lines: List<String>) {
 
     private fun Card.points() : Int = 2.0.pow(this.matches() - 1).toInt()
 
-    fun solvePart1() : Int = cards.sumOf { it.points() }
+    fun part1() : Int = cards.sumOf { it.points() }
 
-    private fun Card.winsCardsWithSelf(): Int {
-        return (0 until this.matches()).sumOf {
-            cards[this.id + it].winsCardsWithSelf()
-        } + 1
-    }
+    private fun Card.winsCardsWithSelf(): Int = (0 until this.matches()).sumOf {
+            cards[this.id + it].winsCardsWithSelf() } + 1
 
-    fun solvePart2() : Int{
-        return cards.sumOf { it.winsCardsWithSelf() }
-    }
-    //Card 1 -> matches = 4 -> 1 + c2() + c3() + c4() + c5() -> 1 + 7 + 4 + 2 + 1 -> 15
-    //Card 2 -> matches = 2 -> 1 + c3() + c4() -> 1 + 4 + 2 -> 7
-    //Card 3 -> matches = 2 -> 1 + c4() + c5() -> 1 + 2 + 1 -> 4
-    //Card 4 -> matches = 1 -> 1 + c5() -> 1 + 1 -> 2
-    //Card 5 -> matches = 0 -> 1
-    //Card 6 -> matches = 0 -> 1
-
+    fun part2() : Int = cards.sumOf { it.winsCardsWithSelf() }
 }
 
