@@ -32,7 +32,7 @@ class Day04(lines: List<String>) {
     }
 
     private fun List(numberSetString: String) : List<Int> =
-        numberSetString.split("  ", " ").map { it.toInt() }
+        numberSetString.split("\\s+".toRegex()).map { it.toInt() }
 
     private fun Card.matches() : List<Int> = this.winningNumbers.filter { numbers.contains(it) }
 
