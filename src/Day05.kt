@@ -1,6 +1,8 @@
+import java.math.BigInteger
+
 fun main() {
     fun part1(input: List<String>): Int {
-        return Day05().part1(input)
+        return Day05().part1(input).toInt()
     }
 
     fun part2(input: List<String>): Int {
@@ -36,20 +38,18 @@ class Day05 {
 
     //need to read seeds - the map in every category
 
-    private var seeds: List<Int> = listOf()
+    private var seeds: List<BigInteger> = listOf()
     private var maps: List<Map> = mutableListOf()
 
-    private fun parseSeeds(line: String): List<Int> = line.removePrefix("seeds: ").split(" ").map { it.toInt() }
+    private fun parseSeeds(line: String): List<BigInteger> = line.removePrefix("seeds: ").split(" ").map { it.toBigInteger() }
     fun parse(lines: List<String>) {
         seeds = parseSeeds(lines.first())
         val mapStrings = lines.drop(3)
         val tempMaps = mutableListOf<Map>()
-        var rows = mutableListOf<Triple<Int,Int,Int>>()
+        var rows = mutableListOf<Triple<BigInteger,BigInteger,BigInteger>>()
         for ((index,line ) in mapStrings.withIndex()) {
-            kotlin.io.println("For loop: $index")
             if (line.isNotEmpty() && line.first().isDigit()) {
                 rows.add(Triple(line))
-                println(Triple(line))
                 if (index == mapStrings.size - 1) {
                     tempMaps.add(Map(rows))
                 }
@@ -58,33 +58,32 @@ class Day05 {
                 tempMaps.add(Map(rows))
                 rows = mutableListOf()
             }
-            tempMaps.forEach { it.rows.println() }
         }
         maps = tempMaps
     }
-    private fun seedToLocation(seed: Int): Int {
+    private fun seedToLocation(seed: BigInteger): BigInteger {
         var location = seed
         maps.forEach { location = it.map(location) }
         return location
     }
 
-    fun part1(lines: List<String>) : Int {
+    fun part1(lines: List<String>) : BigInteger {
         parse(lines)
         return seeds.minOf { seedToLocation(it) }
     }
 
-    private fun Triple(line: String) : Triple<Int,Int,Int> {
-        val list = line.split(" ").map { it.toInt() }
+    private fun Triple(line: String) : Triple<BigInteger,BigInteger,BigInteger> {
+        val list = line.split(" ").map { it.toBigInteger() }
         return  Triple(list[0],list[1],list[2])
     }
 
 
 }
 
-class Map(val rows: MutableList<Triple<Int,Int,Int>>) {
-    fun map(input: Int) : Int {
+class Map(val rows: MutableList<Triple<BigInteger,BigInteger,BigInteger>>) {
+    fun map(input: BigInteger) : BigInteger {
         rows.forEach {
-            if (input in (it.second until(it.second + it.third)))
+            if (input in (it.second ..(it.second + it.third).minus(BigInteger.ONE)))
                 return it.first - it.second + input}
         return input
     }
