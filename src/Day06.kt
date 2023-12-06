@@ -18,41 +18,14 @@ fun main() {
 }
 
 object Day06 {
+    private fun winCount(time: Long, distance: Long) = (1 until time).count { (time - it)*it > distance }
+    fun parse1(lines: List<String>): Int =
+        lines[0].removePrefix("Time: ").trim().split("\\s+".toRegex()).map { it.toLong() }
+            .zip(lines[1].removePrefix("Distance: ").trim().split("\\s+".toRegex()).map { it.toLong() })
+            .map { winCount(it.first, it.second) }
+            .reduce { acc, i -> acc * i }
 
-    //1mm per second for each second the button is held, starts at 0
-    //totaltimeraced = totaltime - timeheld
-    //distance = totaltimeraced*speed
-    //distance = (tot - timeheld)(timeheld)
-    //distance = ( square function)
-
-    //looking for number of ways i can beat each record
-    //multiply the numbers for each record
-
-    fun parse1(lines: List<String>): Int {
-        val times = lines[0].removePrefix("Time: ").trim().split("\\s+".toRegex()).map { it.toInt() }
-        val recordDistance = lines[1].removePrefix("Distance: ").trim().split("\\s+".toRegex()).map { it.toInt() }
-        var multiplicator = 1
-        for (index in times.indices) {
-            multiplicator *= (1 until times[index]).count { (times[index] - it)*it > recordDistance[index] }
-        }
-        return multiplicator
-    }
-
-    fun parse2(lines: List<String>) : Int {
-        var time1 = ""
-        lines[0].removePrefix("Time: ").trim().split("\\s+".toRegex()).forEach {
-            time1 += it
-        }
-        var s = ""
-        lines[1].removePrefix("Distance: ").trim().split("\\s+".toRegex()).forEach {
-            s += it
-        }
-        val time = time1.toLong()
-        val distance = s.toLong()
-        val result = (1 until time).count { (time - it)*it > distance }
-        result.println()
-
-        return result
-    }
-
+    fun parse2(lines: List<String>) = winCount(
+        lines[0].removePrefix("Time: ").trim().split("\\s+".toRegex()).reduce { acc, s -> acc + s }.toLong(),
+        lines[1].removePrefix("Distance: ").trim().split("\\s+".toRegex()).reduce { acc, s -> acc + s }.toLong())
 }
