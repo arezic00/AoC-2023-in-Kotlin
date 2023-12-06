@@ -31,6 +31,7 @@ object Day06 {
         val result = x2.toInt() - x1.toInt()
         return if (floor(x1) == x1 || floor(x2) == x2) result - 1 else result
     }
+
     fun parse1(lines: List<String>): Int =
         lines[0].removePrefix("Time: ").trim().split("\\s+".toRegex()).map { it.toLong() }
             .zip(lines[1].removePrefix("Distance: ").trim().split("\\s+".toRegex()).map { it.toLong() })
@@ -40,5 +41,4 @@ object Day06 {
     fun parse2(lines: List<String>) = winCount(
         lines[0].removePrefix("Time: ").trim().split("\\s+".toRegex()).reduce { acc, s -> acc + s }.toLong(),
         lines[1].removePrefix("Distance: ").trim().split("\\s+".toRegex()).reduce { acc, s -> acc + s }.toLong())
-
 }
