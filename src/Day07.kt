@@ -20,8 +20,10 @@ fun main() {
 }
 
 object Day07 {
-    private const val BASE_TYPE_STRENGTH = 1000000
+    private const val CARDS_IN_HAND = 5
     private const val BASE_CARD_STRENGTH = 13.0
+    private val BASE_TYPE_STRENGTH = BASE_CARD_STRENGTH.pow(CARDS_IN_HAND).toInt()
+
     fun part1(lines: List<String>) = lines.map { Hand(it) }
         .sortedBy { it.strength() }
         .mapIndexed { index, hand -> (index + 1) * hand.bid }.sum()
@@ -149,4 +151,3 @@ object Day07 {
     }
     data class Hand(val bid: Int, val cards: List<Card>)
 }
-
