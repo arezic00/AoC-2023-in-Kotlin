@@ -6,12 +6,13 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        return Day07.part2(input)
     }
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day07_test")
     check(part1(testInput) == 6440)
+    check(part2(testInput) == 5905)
 
     val input = readInput("Day07")
     part1(input).println()
@@ -24,7 +25,14 @@ object Day07 {
             Hand(it)
         }
         val handsResult = hands.sortedBy { it.strength() }
-        handsResult.forEach { kotlin.io.println("Card ${it.bid} strength = ${it.strength()}") }
+        return handsResult.mapIndexed { index, hand -> (index + 1) * hand.bid }.sum()
+    }
+
+    fun part2(lines: List<String>) : Int {
+        val hands = lines.map {
+            Hand(it)
+        }
+        val handsResult = hands.sortedBy { it.strength2() }
         return handsResult.mapIndexed { index, hand -> (index + 1) * hand.bid }.sum()
     }
     private fun Hand(string: String): Hand {
@@ -43,25 +51,76 @@ object Day07 {
         if (counts.contains(2)) return Type.ONE_PAIR
         return Type.HIGH_CARD
     }
-    private fun Hand.strength(): Int {
-        val result = (this.type().ordinal + 1) * 1000000 + cards.cardLabelStrength()
-        return result
+
+    //Ordinal of joker is 9
+    private fun Hand.type2(): Type {
+        val labels = Label.values().toMutableList()
+        labels.removeAt(9)
+        val jokerCount = cards.count { it.label == Label.J }
+        val counts = labels.map { cards.count { card -> card.label == it } }
+        if (counts.contains(5)) return Type.FIVE_OF_A_KIND
+        if (counts.contains(4))
+            return if (jokerCount > 0) Type.FIVE_OF_A_KIND else Type.FOUR_OF_A_KIND
+        if (counts.contains(3) && counts.contains(2))
+            return when (jokerCount) {
+                0 -> Type.FULL_HOUSE
+                1 -> Type.FOUR_OF_A_KIND
+                else -> Type.FIVE_OF_A_KIND
+            }
+        if (counts.contains(3))
+            return when (jokerCount) {
+                0 -> Type.THREE_OF_A_KIND
+                1 -> Type.FOUR_OF_A_KIND
+                else -> Type.FIVE_OF_A_KIND
+            }
+        if (counts.count { it == 2} == 2 )
+            return when (jokerCount) {
+                0 -> Type.TWO_PAIR
+                1 -> Type.FULL_HOUSE
+                2 -> Type.FOUR_OF_A_KIND
+                else -> Type.FIVE_OF_A_KIND
+            }
+        if (counts.contains(2))
+            return when (jokerCount) {
+                0 -> Type.ONE_PAIR
+                1 -> Type.THREE_OF_A_KIND
+                2 -> Type.FOUR_OF_A_KIND
+                else -> Type.FIVE_OF_A_KIND
+            }
+        //0->OP, 1->TH, 2->FR, 3->FV
+        return when (jokerCount) {
+            0 -> Type.HIGH_CARD
+            1 -> Type.ONE_PAIR
+            2 -> Type.THREE_OF_A_KIND
+            3 -> Type.FOUR_OF_A_KIND
+            else -> Type.FIVE_OF_A_KIND
+        }
     }
 
-    private fun List<Card>.cardLabelStrength(): Int {
-        val cards = this.reversed().map { it.label.ordinal + 1 }
-        val newCardStrengths = listOf(
-            cards[0] * 13.0.pow(0).toInt(),
-            cards[1] * 13.0.pow(1).toInt(),
-            cards[2] * 13.0.pow(2).toInt(),
-            cards[3] * 13.0.pow(3).toInt(),
-            cards[4] * 13.0.pow(4).toInt(),)
-        return newCardStrengths.sum()
+    private fun Hand.strength(): Int = (type().ordinal + 1) * 1000000 + cards.cardLabelStrength()
+
+    private fun Hand.strength2(): Int = (type2().ordinal + 1) * 1000000 + cards.cardLabelStrength2()
+
+
+    private fun List<Card>.cardLabelStrength() = reversed()
+        .mapIndexed { index, card -> (card.label.ordinal + 1) * 13.0.pow(index).toInt() }
+        .sum()
+
+    private fun List<Card>.cardLabelStrength2() = reversed()
+        .mapIndexed { index, card ->
+        if (card.label == Label.J)
+            0
+        else
+            (card.strength2()) * 13.0.pow(index).toInt()}
+        .sum()
+
+    private fun Card.strength2(): Int {
+        return if (this.label < Label.J) this.label.ordinal + 1
+        else if (this.label > Label.J) this.label.ordinal
+        else 0
     }
-    /*private fun Hand.rank() : Int {}
-    private fun Hand.winnings(): Int {
-        return rank() * bid
-    }*/
+
+
     enum class Label {
         TWO,
         THREE,
