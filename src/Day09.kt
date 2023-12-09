@@ -10,7 +10,6 @@ fun main() {
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day09_test")
     check(part1(testInput) == 114L)
-    part2(testInput).println()
     check(part2(testInput) == 2L)
 
     val input = readInput("Day09")
@@ -20,8 +19,8 @@ fun main() {
 
 object Day09 {
     fun part1(lines: List<String>): Long {
-        val histories = lines.map { it.split(" ").map { it.toLong() } }
-        return histories.map { extrapolateValue(it) }.sum()
+        val histories = lines.map { line -> line.split(" ").map { it.toLong() } }
+        return histories.sumOf { nextValue(it) }
     }
 
     private fun listOfDifferences(list: List<Long>) : List<Long> {
@@ -33,25 +32,25 @@ object Day09 {
         return result
     }
 
-    private fun extrapolateValue(history: List<Long>): Long {
+    private fun nextValue(history: List<Long>): Long {
         val lists = mutableListOf(history)
         while (lists.last().any { it != 0L }) {
             lists.add(listOfDifferences(lists.last()))
         }
-        return lists.map { it.last() }.runningReduce { acc, l -> acc + l }.last()
+        return lists.map { it.last() }.reduce { acc, l -> acc + l }
     }
 
     fun part2(lines: List<String>): Long {
-        val histories = lines.map { it.split(" ").map { it.toLong() } }
-        return histories.map { extrapolateValueBackwards(it) }.sum()
+        val histories = lines.map { line -> line.split(" ").map { it.toLong() } }
+        return histories.sumOf { previousValue(it) }
     }
 
-    private fun extrapolateValueBackwards(history: List<Long>): Long {
+    private fun previousValue(history: List<Long>): Long {
         val lists = mutableListOf(history)
         while (lists.last().any { it != 0L }) {
             lists.add(listOfDifferences(lists.last()))
         }
-        return lists.reversed().map { it.first() }.runningReduce { acc, l -> l - acc }.last()
+        return lists.reversed().map { it.first() }.reduce { acc, l -> l - acc }
     }
 
 
