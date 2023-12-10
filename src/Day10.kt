@@ -10,9 +10,9 @@ fun main() {
     check(testResult1 == 4)
 
 
-//    val testResult2 = part2(testInput)
-//    println("Test2 result = $testResult2")
-//    check(testResult2 == 1)
+    val testResult2 = part2(testInput)
+    println("Test2 result = $testResult2")
+    check(testResult2 == 1)
 
     val input = readInput("Day10")
     part1(input).println()
@@ -23,6 +23,7 @@ object Day10 {
 
     var COLUMNS = 102
     var ROWS = 140
+    var markedGrid: List<List<MarkedElement>> = emptyList()
     fun part1(lines: List<String>): Int {
         val grid = lines.mapIndexed { row, line ->
             lineToElementRow(line,row)
@@ -35,16 +36,8 @@ object Day10 {
         val loop = buildLoop(grid,startPipe)
         return loop.size / 2
 
-
-
     }
 
-
-
-    //S has exactly 2 pipes connecting to it
-    //there can be loops that arent main
-    //need to find tile in the loop that is farthest from the S - longest number of steps from S to it
-    //(along the loop)
 
     private fun buildLoop(grid: List<List<Element>>,startPipe: Pipe) : List<Pipe> {
         val loop = mutableListOf(startPipe)
@@ -133,20 +126,25 @@ object Day10 {
     }
 
     private fun Pipe.connectsTo(other: Pipe) : Boolean {
-        if (other.row == this.row) {
-            if (other.col == this.col + 1)
-                return this.directions.contains(Direction.EAST) && other.directions.contains(Direction.WEST)
-            if (this.col == other.col + 1)
-                return this.directions.contains(Direction.WEST) && other.directions.contains(Direction.EAST)
-        }
-        if (other.col == this.col) {
-            if (other.row == this.row + 1)
-                return this.directions.contains(Direction.SOUTH) && other.directions.contains(Direction.NORTH)
-            if (this.row == other.row + 1)
-                return this.directions.contains(Direction.NORTH) && other.directions.contains(Direction.SOUTH)
-        }
+        if (this.isDirectlyWestOf(other))
+            return this.directions.contains(Direction.EAST) && other.directions.contains(Direction.WEST)
+
+        if (this.isDirectlyEastOf(other))
+            return this.directions.contains(Direction.WEST) && other.directions.contains(Direction.EAST)
+
+        if (this.isDirectlyNorthOf(other))
+            return this.directions.contains(Direction.SOUTH) && other.directions.contains(Direction.NORTH)
+
+        if (this.isDirectlySouthOf(other))
+            return this.directions.contains(Direction.NORTH) && other.directions.contains(Direction.SOUTH)
+
         return false
     }
+
+    private fun Pipe.isDirectlyNorthOf(other: Pipe) : Boolean = this.col == other.col && this.row == other.row - 1
+    private fun Pipe.isDirectlySouthOf(other: Pipe) : Boolean = this.col == other.col && this.row == other.row + 1
+    private fun Pipe.isDirectlyEastOf(other: Pipe) : Boolean = this.row == other.row && this.col == other.col + 1
+    private fun Pipe.isDirectlyWestOf(other: Pipe) : Boolean = this.row == other.row && this.col == other.col - 1
 
 
     private fun Element(char: Char, row: Int, col: Int) : Element {
@@ -170,7 +168,230 @@ object Day10 {
     }
     open class Element(open val row: Int, open val col: Int)
 
+    data class MarkedElement(var mark: Mark)
 
-    fun part2(lines: List<String>) =
-        0
-}
+    enum class Mark {
+        ENCLOSED,
+        NOT_ENCLOSED,
+        UNMARKED,
+        LOOP_PIPE
+    }
+
+    fun markAllEnclosedTiles(pipes: List<Pipe>) {
+        var directionInsideLoop = Direction.EAST
+        for (i in 1 until pipes.size) {
+            if (pipes[i].isDirectlyNorthOf(pipes[i-1])) {
+                when (directionInsideLoop) {
+                    Direction.NORTH -> println("ERROR")
+                    Direction.EAST -> {
+                        if (pipes[i].directions.contains(Direction.NORTH)) {
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        }
+                        else if (pipes[i].directions.contains(Direction.EAST)) {
+                            directionInsideLoop = Direction.SOUTH
+                        }
+                        else if (pipes[i].directions.contains(Direction.WEST))
+                        {
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                            directionInsideLoop = Direction.NORTH
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        }
+                    }
+                    Direction.SOUTH -> {
+                        kotlin.io.println("ERROR")
+                    }
+                    Direction.WEST -> {
+                        if (pipes[i].directions.contains(Direction.NORTH))
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        else if (pipes[i].directions.contains(Direction.EAST)) {
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                            directionInsideLoop = Direction.NORTH
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        }
+                        else if (pipes[i].directions.contains(Direction.WEST))
+                        {
+                            directionInsideLoop = Direction.SOUTH
+                        }
+                    }
+                }
+            }
+            else if (pipes[i].isDirectlyEastOf(pipes[i-1])) {
+                when (directionInsideLoop) {
+                    Direction.NORTH -> {
+                        if (pipes[i].directions.contains(Direction.NORTH))
+                            directionInsideLoop = Direction.WEST
+                        else if (pipes[i].directions.contains(Direction.EAST))
+                            spreadFromLoopPipe(pipes[i], directionInsideLoop)
+                        else if (pipes[i].directions.contains(Direction.SOUTH)) {
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                            directionInsideLoop = Direction.EAST
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        }
+                    }
+                    Direction.EAST -> println("ERROR")
+                    Direction.SOUTH -> {
+                        if (pipes[i].directions.contains(Direction.NORTH)) {
+                            spreadFromLoopPipe(pipes[i], directionInsideLoop)
+                            directionInsideLoop = Direction.EAST
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        }
+                        else if (pipes[i].directions.contains(Direction.EAST))
+                            spreadFromLoopPipe(pipes[i], directionInsideLoop)
+                        else if (pipes[i].directions.contains(Direction.SOUTH)) {
+                            directionInsideLoop = Direction.WEST
+                        }
+                    }
+                    Direction.WEST -> kotlin.io.println("ERROR")
+                }
+            }
+            else if (pipes[i].isDirectlySouthOf(pipes[i-1])) {
+                when (directionInsideLoop) {
+                    Direction.NORTH -> println("ERROR")
+                    Direction.EAST -> {
+                        if (pipes[i].directions.contains(Direction.EAST))
+                            directionInsideLoop = Direction.NORTH
+                        else if (pipes[i].directions.contains(Direction.SOUTH))
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        else if (pipes[i].directions.contains(Direction.WEST))
+                        {
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                            directionInsideLoop = Direction.SOUTH
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        }
+                    }
+                    Direction.SOUTH -> println("ERROR")
+                    Direction.WEST -> {
+                        if (pipes[i].directions.contains(Direction.EAST)) {
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                            directionInsideLoop = Direction.SOUTH
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        }
+                        else if (pipes[i].directions.contains(Direction.SOUTH))
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        else if (pipes[i].directions.contains(Direction.WEST))
+                        {
+                            directionInsideLoop = Direction.NORTH
+                        }
+                    }
+                }
+            }
+            else if (pipes[i].isDirectlyWestOf(pipes[i-1])) {
+                when (directionInsideLoop) {
+                    Direction.NORTH -> {
+                        if (pipes[i].directions.contains(Direction.SOUTH)) {
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                            directionInsideLoop = Direction.WEST
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        }
+                        else if (pipes[i].directions.contains(Direction.WEST))
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        else if (pipes[i].directions.contains(Direction.NORTH))
+                        {
+                            directionInsideLoop = Direction.EAST
+                        }
+                    }
+                    Direction.EAST -> println("ERROR")
+                    Direction.SOUTH -> {
+                        if (pipes[i].directions.contains(Direction.SOUTH)) {
+                            directionInsideLoop = Direction.EAST
+                        }
+                        else if (pipes[i].directions.contains(Direction.WEST))
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        else if (pipes[i].directions.contains(Direction.NORTH))
+                        {
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                            directionInsideLoop = Direction.WEST
+                            spreadFromLoopPipe(pipes[i],directionInsideLoop)
+                        }
+                    }
+                    Direction.WEST -> println("ERROR")
+                }
+            }
+
+
+
+        }
+    }
+
+    private fun spreadFromLoopPipe(pipe: Pipe, direction: Direction) {
+        when (direction) {
+            Direction.NORTH -> spread(pipe.row -1 , pipe.col)
+            Direction.EAST -> spread(pipe.row, pipe.col + 1)
+            Direction.SOUTH -> spread(pipe.row + 1, pipe.col)
+            Direction.WEST -> spread(pipe.row, pipe.col - 1)
+        }
+    }
+
+    private fun outOfBounds(row: Int, col: Int) : Boolean = !(row in 0 until ROWS && col in 0 until COLUMNS)
+
+    private fun spread(row: Int, col: Int) {
+        if (outOfBounds(row,col) || markedGrid[row][col].mark != Mark.UNMARKED)
+            return
+        markedGrid[row][col].mark = Mark.ENCLOSED
+        spread(row - 1, col)
+        spread(row, col + 1)
+        spread(row + 1, col)
+        spread(row, col - 1)
+        return
+    }
+
+    fun part2(lines: List<String>) :Int {
+        val grid = lines.mapIndexed { row, line ->
+            lineToElementRow(line, row)
+        }
+        ROWS = grid.size
+        COLUMNS = grid.first().size
+
+        val startPipe = findStart(grid)
+        val loop = buildLoop(grid, startPipe)
+
+        markedGrid = grid.map { row ->
+            row.map { element ->
+                if (loop.contains(element)) MarkedElement(Mark.LOOP_PIPE)
+                else MarkedElement(Mark.UNMARKED)
+            }
+        }
+
+//        markedGrid.map { it.map { if(it.mark == Mark.UNMARKED) '0' else '*' }   }.forEach { it.println() }
+
+        markedGrid.forEach { it.map { if (it.mark == Mark.LOOP_PIPE) '*' else ' '}.println()  }
+        markAllEnclosedTiles(loop)
+        markedGrid.forEach { it.map { if (it.mark == Mark.ENCLOSED) '*' else ' '}.println()  }
+
+        return markedGrid.sumOf { it.filter { it.mark == Mark.ENCLOSED }.count() }
+    }
+
+
+
+
+
+        //FINDING THE LOOP FROM OUTSIDE
+        /*var loopContact: Pipe? = null
+        for (col in COLUMNS/2 until COLUMNS)
+            if (markedGrid[0][col].mark == Mark.UNMARKED) {
+                markedGrid[0][col].mark = Mark.NOT_ENCLOSED
+                for (row in markedGrid.indices) {
+                    if (markedGrid[row][col].mark == Mark.UNMARKED)
+                        markedGrid[row][col].mark = Mark.NOT_ENCLOSED
+                    else {
+                        loopContact = loop.find { it.col == col && it.row == row }
+                        break
+                    }
+                }
+                break
+            }
+
+        if (loopContact == null)
+            kotlin.io.println("Loop not found from outside")*/
+
+
+
+        // -> mark all the obvious outside elements (from edge to center)
+        // until you get to a tile that touches a loop pipe
+        // -> go along the loop and mark outside pieces and inside pieces with spread
+        // make spread mark function MAKE SURE TO CHECK IF PIPE
+        // keep track of inside side of loop
+
+    }
+
+
