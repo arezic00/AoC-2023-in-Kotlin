@@ -177,8 +177,13 @@ object Day10 {
         LOOP_PIPE
     }
 
+
+    //this function keeps track of the inside of the loop with each new loop pipe (directionInsideLoop)
+    //spreads the ENCLOSED mark recursively starting from each element that touches the inside of the loop
     fun markAllEnclosedTiles(pipes: List<Pipe>) {
+        //it's a 50/50 guess and I got it right for both the test and the real input :D
         var directionInsideLoop = Direction.EAST
+
         for (i in 1 until pipes.size) {
             if (pipes[i].isDirectlyNorthOf(pipes[i-1])) {
                 when (directionInsideLoop) {
