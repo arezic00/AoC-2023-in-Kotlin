@@ -1,25 +1,20 @@
 fun main() {
-    fun part1(input: List<String>) = Day00.part1(input)
-
-    fun part2(input: List<String>)= Day00.part2(input)
-
-    // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day00_test")
-    val testResult1 = part1(testInput)
-    println("Test1 result = $testResult1")
-//    check(testResult1 == 1)
-//    val testResult2 = part2(testInput)
-//    println("Test2 result = $testResult2")
-//    check(testResult2 == 1)
-
     val input = readInput("Day00")
-    part1(input).println()
-    part2(input).println()
+    val testInput = readInput("Day00_test")
+
+    val testResult1 = part1(testInput)
+    println("Test1 = $testResult1")
+//    check(testResult1 == 1)
+//    println("Part1 = ${part1(input)}")
+//
+//    val testResult2 = part2(testInput)
+//    println("\nTest2 = $testResult2")
+//    check(testResult2 == 1)
+//    println("Part2 = ${part2(input)}")
 }
 
-object Day00 {
-    fun part1(lines: List<String>) =
-        0
+private fun part1(lines: List<String>) =
+    0
 
 
 
@@ -29,6 +24,5 @@ object Day00 {
 
 
 
-    fun part2(lines: List<String>) =
-        0
-}
+private fun part2(lines: List<String>) =
+    0

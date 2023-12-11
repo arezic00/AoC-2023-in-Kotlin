@@ -1,6 +1,3 @@
-import Day01.part1
-import Day01.part2
-
 fun main() {
     val testInput = readInput("Day01_test")
     check(part1(testInput) == 142)
@@ -12,28 +9,26 @@ fun main() {
     part2(input).println()
 }
 
-object Day01 {
-    private val words = listOf("zero","one","two","three","four","five","six","seven","eight","nine")
-
-    fun part1(lines: List<String>) = lines.sumOf { lineToCalibrationValue(it) }
-    private fun lineToCalibrationValue(line: String) : Int {
+private val words = listOf("zero","one","two","three","four","five","six","seven","eight","nine")
+private fun part1(lines: List<String>) = lines.sumOf { lineToCalibrationValue(it) }
+private fun lineToCalibrationValue(line: String) : Int {
         val first = line.dropWhile { !(it.isDigit()) }.first()
         val last = line.dropLastWhile { !(it.isDigit()) }.last()
         return first.digitToInt() * 10 + last.digitToInt()
     }
-    private fun firstDigitWithIndex(line: String) : Pair<Int,Int> {
+private fun firstDigitWithIndex(line: String) : Pair<Int,Int> {
         line.forEachIndexed { index, c ->
             if (c.isDigit()) return Pair(c.digitToInt(),index)
         }
         return Pair(-1,-1)
     }
-    private fun lastDigitWithIndex(line: String) : Pair<Int,Int> {
+private fun lastDigitWithIndex(line: String) : Pair<Int,Int> {
         line.reversed().forEachIndexed { index, c ->
             if (c.isDigit()) return Pair(c.digitToInt(),index)
         }
         return Pair(-1,-1)
     }
-    private fun firstWordWithIndex(line: String) : Pair<String,Int> {
+private fun firstWordWithIndex(line: String) : Pair<String,Int> {
         var firstWordIndex = 9999
         var firstWord = ""
         words.forEach {
@@ -45,8 +40,7 @@ object Day01 {
         }
         return Pair(firstWord,firstWordIndex)
     }
-
-    private fun lastWordWithIndex(line: String) : Pair<String,Int> {
+private fun lastWordWithIndex(line: String) : Pair<String,Int> {
         var firstWordIndex = 9999
         var firstWord = ""
         words.forEach {
@@ -58,8 +52,7 @@ object Day01 {
         }
         return Pair(firstWord,firstWordIndex)
     }
-
-    private fun lineToCalibrationValue2(line: String) : Int {
+private fun lineToCalibrationValue2(line: String) : Int {
         val firstWordPair = firstWordWithIndex(line)
         val firstDigitPair = firstDigitWithIndex(line)
 
@@ -79,5 +72,4 @@ object Day01 {
         val lastDigit : Int = if (lastDigitPair.second < lastWordPair.second) lastDigitPair.first else words.indexOf(lastWordPair.first)
         return firstDigit * 10 + lastDigit
     }
-    fun part2(lines: List<String>) :Int = lines.sumOf { lineToCalibrationValue2(it) }
-}
+private fun part2(lines: List<String>) :Int = lines.sumOf { lineToCalibrationValue2(it) }
