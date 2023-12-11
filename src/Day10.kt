@@ -172,7 +172,6 @@ object Day10 {
 
     enum class Mark {
         ENCLOSED,
-        NOT_ENCLOSED,
         UNMARKED,
         LOOP_PIPE
     }
@@ -180,7 +179,7 @@ object Day10 {
 
     //this function keeps track of the inside of the loop with each new loop pipe (directionInsideLoop)
     //spreads the ENCLOSED mark recursively starting from each element that touches the inside of the loop
-    fun markAllEnclosedTiles(pipes: List<Pipe>) {
+    private fun markAllEnclosedTiles(pipes: List<Pipe>) {
         //it's a 50/50 guess and I got it right for both the test and the real input :D
         var directionInsideLoop = Direction.EAST
 
@@ -366,36 +365,6 @@ object Day10 {
         return markedGrid.sumOf { it.filter { it.mark == Mark.ENCLOSED }.count() }
     }
 
-
-
-
-
-        //FINDING THE LOOP FROM OUTSIDE
-        /*var loopContact: Pipe? = null
-        for (col in COLUMNS/2 until COLUMNS)
-            if (markedGrid[0][col].mark == Mark.UNMARKED) {
-                markedGrid[0][col].mark = Mark.NOT_ENCLOSED
-                for (row in markedGrid.indices) {
-                    if (markedGrid[row][col].mark == Mark.UNMARKED)
-                        markedGrid[row][col].mark = Mark.NOT_ENCLOSED
-                    else {
-                        loopContact = loop.find { it.col == col && it.row == row }
-                        break
-                    }
-                }
-                break
-            }
-
-        if (loopContact == null)
-            kotlin.io.println("Loop not found from outside")*/
-
-
-
-        // -> mark all the obvious outside elements (from edge to center)
-        // until you get to a tile that touches a loop pipe
-        // -> go along the loop and mark outside pieces and inside pieces with spread
-        // make spread mark function MAKE SURE TO CHECK IF PIPE
-        // keep track of inside side of loop
 
     }
 
