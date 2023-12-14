@@ -19,3 +19,28 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  * The cleaner shorthand for printing output.
  */
 fun Any?.println() = println(this)
+
+
+/**
+ * Input lines transformations
+ */
+fun List<String>.columns() : List<String> {
+    val result = mutableListOf<String>()
+    for (col in this.first().indices) {
+        var resultString = ""
+        for (row in this.indices) {
+            resultString += this[row][col]
+        }
+        result.add(resultString)
+    }
+    return result
+}
+
+fun List<String>.rotateCCW(): List<String> {
+
+    return this.columns().reversed()
+}
+
+fun List<String>.rotateCW(): List<String> {
+    return this.reversed().columns()
+}

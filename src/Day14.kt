@@ -1,5 +1,3 @@
-import kotlin.time.measureTime
-
 fun main() {
     val input = readInput("Day14")
     val testInput = readInput("Day14_test")
@@ -11,18 +9,14 @@ fun main() {
 
     val testResult2 = part2(testInput)
     println("\nTest2 = $testResult2")
-//    check(testResult2 == 64)
+    check(testResult2 == 64)
     println("Part2 = ${part2(input)}")
 }
 
 private fun part1(lines: List<String>) = lines.rotateCCW().tilt().rotateCW().load()
 
-
-//maybe add a noRockInInterval: Boolean to optimize
-//make a better function that just takes the isolated islands
 private fun String.tilt() : String {
     val result = this.toMutableList()
-    var firstEmpty = 0
     for (index in result.indices) {
         if (result[index] == 'O')
             continue
@@ -43,45 +37,34 @@ private fun String.tilt() : String {
 }
 
 private fun List<String>.tilt() : List<String> = this.map { it.tilt() }
-private fun String.load() = this.reversed().withIndex().filter { it.value == 'O' }.sumOf { it.index + 1 }
 
 private  fun List<String>.load() = this.reversed().mapIndexed { index, row -> row.count { it == 'O' } * (index + 1) }.sum()
-private fun List<String>.columns() : List<String> {
-    val result = mutableListOf<String>()
-    for (col in this.first().indices) {
-        var resultString = ""
-        for (row in this.indices) {
-            resultString += this[row][col]
-        }
-        result.add(resultString)
-    }
-    return result
-}
-
-//optimize columns function to be CCW
-private fun List<String>.rotateCCW(): List<String> {
-
-    return this.columns().reversed()
-}
-
-private fun List<String>.rotateCW(): List<String> {
-    return this.reversed().columns()
-}
 
 private fun List<String>.cycle(): List<String> = this.rotateCCW().tilt().rotateCW().tilt().rotateCW().tilt().rotateCW().tilt().rotateCCW().rotateCCW()
 
-
-//5 seconds for 100000 iterations
-//50 000s/833min for 1bil iterations
-//find out loop cycle size that has same results
-
-private fun part2(lines: List<String>) {
-    var result = lines
-    val time = measureTime {
-        repeat(1000)
-        {result = result.cycle()}
+private fun findLoopSize(lines: List<String>): Pair<Int, Int> {
+    var dish = lines
+    val seen = mutableSetOf(lines)
+    var ctr = 0
+    while (true) {
+        ctr++
+        dish = dish.cycle()
+        if (dish in seen)
+            break
+        seen.add(dish)
     }
-    time.println()
-    result.load().println()
+    val first = seen.indexOfFirst { it == dish }
+    val loopSize = ctr - first
+    return Pair(first,loopSize)
+}
 
+private fun part2(lines: List<String>): Int {
+    val pair = findLoopSize(lines)
+
+    val targetCycles = 1000000000
+    val cycles = pair.first + (targetCycles - pair.first)%pair.second
+
+    var result = lines
+    repeat(cycles) {result = result.cycle()}
+    return result.load()
 }

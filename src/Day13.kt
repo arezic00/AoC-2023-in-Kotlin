@@ -74,17 +74,6 @@ private fun newMirrorIndex(pattern: List<String>, oldIndex: Int): Int {
     return 0
 }
 
-private fun List<String>.columns() : List<String> {
-    val result = mutableListOf<String>()
-    for (col in this.first().indices) {
-        var resultString = ""
-        for (row in this.indices) {
-            resultString += this[row][col]
-        }
-        result.add(resultString)
-    }
-    return result
-}
 
 private fun summarize2(pattern: List<String>): Int {
     val oldRow = mirrorIndex(pattern)
