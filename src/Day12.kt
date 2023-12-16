@@ -5,14 +5,14 @@ fun main() {
     val testInput = readInput("Day12_test")
 
     val testResult1 = part1(testInput)
-    println("Test1 = $testResult1")
-    check(testResult1 == 21)
-    println("Part1 = ${part1(input)}")
+//    println("Test1 = $testResult1")
+//    check(testResult1 == 21)
+//    println("Part1 = ${part1(input)}")
 
-//    val testResult2 = part2(testInput)
-//    println("\nTest2 = $testResult2")
+    val testResult2 = part2(testInput)
+    println("\nTest2 = $testResult2")
 //    check(testResult2 == 1)
-//    println("Part2 = ${part2(input)}")
+    println("Part2 = ${part2(input)}")
 }
 
 private fun part1(lines: List<String>): Int {
@@ -68,6 +68,6 @@ private fun arrange(pattern: String, arrangement: String, questionMarkIndices: L
 
 
 private fun part2(lines: List<String>) =
-    0
+    lines.filter { it.count { it == '?' } == 18}
 
 private data class Record(val pattern: String, val groups: List<Int>)
