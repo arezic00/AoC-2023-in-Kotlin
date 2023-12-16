@@ -44,3 +44,20 @@ fun List<String>.rotateCCW(): List<String> {
 fun List<String>.rotateCW(): List<String> {
     return this.reversed().columns()
 }
+
+enum class Direction {
+    NORTH, EAST, SOUTH, WEST
+}
+
+fun toRowCol(direction: Direction, fromRow: Int, fromCol: Int) : Pair<Int,Int> {
+    return when (direction) {
+        Direction.NORTH -> Pair(fromRow - 1,fromCol)
+        Direction.EAST -> Pair(fromRow,fromCol + 1)
+        Direction.SOUTH -> Pair(fromRow + 1,fromCol)
+        Direction.WEST -> Pair(fromRow,fromCol - 1)
+    }
+}
+
+fun Direction.rotateCW() = if (this != Direction.WEST) Direction.values()[this.ordinal + 1] else Direction.NORTH
+
+fun Direction.rotateCCW() = if (this != Direction.NORTH) Direction.values()[this.ordinal -1] else Direction.WEST

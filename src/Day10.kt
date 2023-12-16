@@ -97,9 +97,6 @@ object Day10 {
         return line.withIndex().map { Element(it.value,row, it.index) }
     }
 
-    enum class Direction {
-        NORTH, EAST, SOUTH, WEST
-    }
 
     enum class Sign {
         EMPTY,
@@ -202,7 +199,7 @@ object Day10 {
                         }
                     }
                     Direction.SOUTH -> {
-                        kotlin.io.println("ERROR")
+                        println("ERROR")
                     }
                     Direction.WEST -> {
                         if (pipes[i].directions.contains(Direction.NORTH))
@@ -245,7 +242,7 @@ object Day10 {
                             directionInsideLoop = Direction.WEST
                         }
                     }
-                    Direction.WEST -> kotlin.io.println("ERROR")
+                    Direction.WEST -> println("ERROR")
                 }
             }
             else if (pipes[i].isDirectlySouthOf(pipes[i-1])) {
