@@ -49,12 +49,12 @@ enum class Direction {
     NORTH, EAST, SOUTH, WEST
 }
 
-fun toRowCol(direction: Direction, fromRow: Int, fromCol: Int) : Pair<Int,Int> {
+fun toRowCol(direction: Direction, fromRow: Int, fromCol: Int, steps: Int = 1) : Pair<Int,Int> {
     return when (direction) {
-        Direction.NORTH -> Pair(fromRow - 1,fromCol)
-        Direction.EAST -> Pair(fromRow,fromCol + 1)
-        Direction.SOUTH -> Pair(fromRow + 1,fromCol)
-        Direction.WEST -> Pair(fromRow,fromCol - 1)
+        Direction.NORTH -> Pair(fromRow - steps,fromCol)
+        Direction.EAST -> Pair(fromRow,fromCol + steps)
+        Direction.SOUTH -> Pair(fromRow + steps,fromCol)
+        Direction.WEST -> Pair(fromRow,fromCol - steps)
     }
 }
 
