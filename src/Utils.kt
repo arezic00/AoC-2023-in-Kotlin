@@ -58,6 +58,15 @@ fun toRowCol(direction: Direction, fromRow: Int, fromCol: Int, steps: Int = 1) :
     }
 }
 
+fun toRowCol(direction: Direction, fromRow: Long, fromCol:Long, steps: Long = 1) : Pair<Long, Long> {
+    return when (direction) {
+        Direction.NORTH -> Pair(fromRow - steps,fromCol)
+        Direction.EAST -> Pair(fromRow,fromCol + steps)
+        Direction.SOUTH -> Pair(fromRow + steps,fromCol)
+        Direction.WEST -> Pair(fromRow,fromCol - steps)
+    }
+}
+
 fun Direction.rotateCW() = Direction.entries[(this.ordinal + 1) % 4]
 
 fun Direction.rotateCCW() = Direction.entries[(this.ordinal -1) % 4]
