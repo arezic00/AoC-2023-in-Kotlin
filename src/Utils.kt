@@ -58,6 +58,15 @@ fun toRowCol(direction: Direction, fromRow: Int, fromCol: Int) : Pair<Int,Int> {
     }
 }
 
-fun Direction.rotateCW() = if (this != Direction.WEST) Direction.values()[this.ordinal + 1] else Direction.NORTH
+fun Direction.rotateCW() = Direction.entries[(this.ordinal + 1) % 4]
 
-fun Direction.rotateCCW() = if (this != Direction.NORTH) Direction.values()[this.ordinal -1] else Direction.WEST
+fun Direction.rotateCCW() = Direction.entries[(this.ordinal -1) % 4]
+
+fun Direction.opposite() = Direction.entries[(this.ordinal + 2) % 4]
+
+fun Direction.toChar() = when (this) {
+    Direction.NORTH -> '^'
+    Direction.EAST -> '>'
+    Direction.SOUTH -> 'V'
+    Direction.WEST -> '<'
+}
