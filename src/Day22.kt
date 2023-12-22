@@ -16,28 +16,26 @@ fun main() {
 }
 
 private fun part1(lines: List<String>): Int {
-    val bricks = lines.map { Brick(it) }.sortedBy { it.z1 }
-    val settledBricks = buildList<Brick> {
-        bricks.forEach { add(it.fallOn(this)) }
-    }
-
+    val settledBricks = parse(lines)
     return settledBricks.count { !it.isSoloSupport(settledBricks) }
 }
 
+private fun part2(lines: List<String>): Int {
+    val settledBricks = parse(lines)
+    return settledBricks.sumOf { settledBricks.disintegrate(listOf(it)) - 1 }
+}
 
-
+private fun parse(lines: List<String>): List<Brick> {
+    val bricks = lines.map { Brick(it) }.sortedBy { it.z1 }
+    return buildList { bricks.forEach { add(it.fallOn(this)) } }
+}
 
 private fun Brick.fallOn(bricks: List<Brick>) : Brick {
     if (z1 == 1)
         return this
 
-    val plane = Rectangle(this.x1, this.y1, this.x2 - this.x1 + 1, this.y2 - this.y1 + 1)
     for (brick in bricks.sortedByDescending { it.z2 }) {
-        //maybe remove this after, check if it still works
-        if (brick.z2 >= z1)
-            continue
-        val other = Rectangle(brick.x1, brick.y1, brick.x2 - brick.x1 + 1, brick.y2 - brick.y1 + 1)
-        if (plane.intersects(other))
+        if (this.intersects(brick))
             return fallAt(brick.z2 + 1)
     }
     return fallAt(1)
@@ -74,9 +72,9 @@ private fun Brick.supports(other: Brick) : Boolean {
 }
 
 private fun Brick.intersects(other: Brick): Boolean {
-    val plane = Rectangle(this.x1, this.y1, this.x2 - this.x1 + 1, this.y2 - this.y1 + 1)
-    val other = Rectangle(other.x1, other.y1, other.x2 - other.x1 + 1, other.y2 - other.y1 + 1)
-    return plane.intersects(other)
+    val plane1 = Rectangle(this.x1, this.y1, this.x2 - this.x1 + 1, this.y2 - this.y1 + 1)
+    val plane2 = Rectangle(other.x1, other.y1, other.x2 - other.x1 + 1, other.y2 - other.y1 + 1)
+    return plane1.intersects(plane2)
 }
 
 private fun List<Brick>.disintegrate(toBeDisintegrated: List<Brick>): Int {
@@ -90,8 +88,7 @@ private fun List<Brick>.disintegrate(toBeDisintegrated: List<Brick>): Int {
         }
     }
 
-    return toBeDisintegrated.count() + this.subtract(toBeDisintegrated).toList().disintegrate(disintegrationList)
-
+    return toBeDisintegrated.count() + this.subtract(toBeDisintegrated.toSet()).toList().disintegrate(disintegrationList)
 }
 
 private fun List<Brick>.support(bricks: List<Brick>) : List<Brick> = map { it.supports(bricks) }.flatten().distinct()
@@ -107,12 +104,3 @@ private fun Brick(line: String) : Brick {
 }
 
 data class Brick(val x1: Int, val y1: Int, val z1: Int, val x2: Int, val y2: Int, val z2: Int)
-
-private fun part2(lines: List<String>): Int {
-    val bricks = lines.map { Brick(it) }.sortedBy { it.z1 }
-    val settledBricks = buildList<Brick> {
-        bricks.forEach { add(it.fallOn(this)) }
-    }
-
-    return settledBricks.sumOf { settledBricks.disintegrate(listOf(it)) - 1 }
-}
