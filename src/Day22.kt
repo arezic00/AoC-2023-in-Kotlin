@@ -22,15 +22,15 @@ private fun part1(lines: List<String>): Int {
 
 private fun part2(lines: List<String>): Int {
     val settledBricks = parse(lines)
-    return settledBricks.sumOf { settledBricks.disintegrate(listOf(it)) - 1 }
+    return settledBricks.sumOf { settledBricks.disintegrate(setOf(it)) - 1 }
 }
 
-private fun parse(lines: List<String>): List<Brick> {
-    val bricks = lines.map { Brick(it) }.sortedBy { it.z1 }
-    return buildList { bricks.forEach { add(it.fallOn(this)) } }
+private fun parse(lines: List<String>): Set<Brick> {
+    val bricks = lines.map { Brick(it) }.toSet().sortedBy { it.z1 }
+    return buildSet { bricks.forEach { add(it.fallOn(this)) } }
 }
 
-private fun Brick.fallOn(bricks: List<Brick>) : Brick {
+private fun Brick.fallOn(bricks: Set<Brick>) : Brick {
     if (z1 == 1)
         return this
 
@@ -43,11 +43,11 @@ private fun Brick.fallOn(bricks: List<Brick>) : Brick {
 
 private fun Brick.fallAt(z: Int) = Brick(x1, y1, z, x2, y2, z2 - (z1 - z))
 
-private fun Brick.isSoloSupport(bricks: List<Brick>) : Boolean {
+private fun Brick.isSoloSupport(bricks: Set<Brick>) : Boolean {
     return this.supports(bricks).any { it.hasOneSupport(bricks) }
 }
 
-private fun Brick.hasOneSupport(bricks: List<Brick>) : Boolean {
+private fun Brick.hasOneSupport(bricks: Set<Brick>) : Boolean {
     var hasSupport = false
     for (brick in bricks) {
         if (brick.supports(this)) {
@@ -59,12 +59,12 @@ private fun Brick.hasOneSupport(bricks: List<Brick>) : Boolean {
     return hasSupport
 }
 
-private fun Brick.supports(bricks: List<Brick>) : List<Brick> {
-    return bricks.filter { it.z1 == z2 + 1 && it.intersects(this)}
+private fun Brick.supports(bricks: Set<Brick>) : Set<Brick> {
+    return bricks.filter { it.z1 == z2 + 1 && it.intersects(this)}.toSet()
 }
 
-private fun Brick.getSupports(bricks: List<Brick>) : List<Brick> {
-    return bricks.filter { it.z2 == z1 - 1 && it.intersects(this)}
+private fun Brick.getSupports(bricks: Set<Brick>) : Set<Brick> {
+    return bricks.filter { it.z2 == z1 - 1 && it.intersects(this)}.toSet()
 }
 
 private fun Brick.supports(other: Brick) : Boolean {
@@ -77,23 +77,23 @@ private fun Brick.intersects(other: Brick): Boolean {
     return plane1.intersects(plane2)
 }
 
-private fun List<Brick>.disintegrate(toBeDisintegrated: List<Brick>): Int {
+private fun Set<Brick>.disintegrate(toBeDisintegrated: Set<Brick>): Int {
     if (toBeDisintegrated.isEmpty())
         return 0
 
-    val disintegrationList = buildList {
+    val disintegrationList = buildSet {
         for (brick in toBeDisintegrated.support(this@disintegrate)) {
             if (toBeDisintegrated.areTheOnlySupportOf(brick, this@disintegrate))
                 add(brick)
         }
     }
 
-    return toBeDisintegrated.count() + this.subtract(toBeDisintegrated.toSet()).toList().disintegrate(disintegrationList)
+    return toBeDisintegrated.count() + this.subtract(toBeDisintegrated.toSet()).disintegrate(disintegrationList)
 }
 
-private fun List<Brick>.support(bricks: List<Brick>) : List<Brick> = map { it.supports(bricks) }.flatten().distinct()
+private fun Set<Brick>.support(bricks: Set<Brick>) : List<Brick> = map { it.supports(bricks) }.flatten().distinct()
 
-private fun List<Brick>.areTheOnlySupportOf(brick: Brick, bricks: List<Brick>): Boolean {
+private fun Set<Brick>.areTheOnlySupportOf(brick: Brick, bricks: Set<Brick>): Boolean {
     return brick.getSupports(bricks).all { it in this }
 }
 
