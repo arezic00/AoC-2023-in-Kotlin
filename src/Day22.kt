@@ -1,5 +1,3 @@
-import java.awt.Rectangle
-
 fun main() {
     val input = readInput("Day22")
     val testInput = readInput("Day22_test")
@@ -72,9 +70,7 @@ private fun Brick.supports(other: Brick) : Boolean {
 }
 
 private fun Brick.intersects(other: Brick): Boolean {
-    val plane1 = Rectangle(this.x1, this.y1, this.x2 - this.x1 + 1, this.y2 - this.y1 + 1)
-    val plane2 = Rectangle(other.x1, other.y1, other.x2 - other.x1 + 1, other.y2 - other.y1 + 1)
-    return plane1.intersects(plane2)
+    return x1 <= other.x2 && other.x1 <= x2 && y1 <= other.y2 && other.y1 <= y2
 }
 
 private fun Set<Brick>.disintegrate(toBeDisintegrated: Set<Brick>): Int {
