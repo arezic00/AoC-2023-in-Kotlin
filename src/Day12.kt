@@ -5,23 +5,23 @@ fun main() {
     val testInput = readInput("Day12_test")
 
     val testResult1 = part1(testInput)
-//    println("Test1 = $testResult1")
-//    check(testResult1 == 21)
-//    println("Part1 = ${part1(input)}")
+    println("Test1 = $testResult1")
+    check(testResult1 == 21L)
+    println("Part1 = ${part1(input)}")
 
     val testResult2 = part2(testInput)
     println("\nTest2 = $testResult2")
-//    check(testResult2 == 1)
+    check(testResult2 == 525152L)
     println("Part2 = ${part2(input)}")
 }
 
-private fun part1(lines: List<String>): Int {
+private fun part1(lines: List<String>): Long {
     val records = lines.map { recordString ->
         Record(
             recordString.substringBefore(' '),
             recordString.substringAfter(' ').split(',').map { it.toInt() })
     }
-    return records.sumOf { it.validArrangements() }
+    return records.sumOf { it.validArrangements2() }
 }
 
 private fun Record.validArrangements(): Int {
@@ -62,12 +62,52 @@ private fun arrange(pattern: String, arrangement: String, questionMarkIndices: L
 
 
 
+private fun Record.validArrangements2(): Long {
+    seen[this]?.let { return it }
+    if (groups.isEmpty()) {
+        return  if (pattern.contains('#')) 0L else 1L
+    }
 
+    val len = pattern.length - groups.sumOf { it + 1 } + 1
+    var sum = 0L
+    for (i in 0 .. len) {
+        if (this.canPlace(i)) {
+            val subRecord = this.cut(i)
+            sum += subRecord.validArrangements2()
+        }
+    }
+    seen[this] = sum
+    return sum
+}
 
+private fun Record.canPlace(index: Int): Boolean {
+    val broken = pattern.substring(index, index + groups.first())
+    val start = pattern.substring(0,index)
+    val end = if (groups.first() + index == pattern.length) '.' else pattern[groups.first() + index]
+    return broken.all { it == '#' || it == '?' } &&  (end == '?' || end == '.')  && (start.isEmpty() || start.all { it == '?' || it == '.' })
+}
+private fun Record.cut(index: Int) = Record(this.pattern.drop(this.groups.first() + index + 1).trim('.'), this.groups.drop(1))
 
+val seen = mutableMapOf<Record, Long>()
+private fun List<Record>.validArrangements(): Long {
+    return this.sumOf {
+        seen.clear()
+        it.validArrangements2()
+    }
+}
+private fun part2(lines: List<String>): Long {
+    val records = lines.map { recordString ->
+        val pattern = recordString.substringBefore(' ')
+        val groups = recordString.substringAfter(' ').split(',').map { it.toInt() }
+        Record(
+            buildString {
+                append(pattern)
+                repeat(4) {append("?$pattern")} }.trim('.'),
+            buildList { repeat(5) {addAll(groups)} })
+    }
 
+    return records.validArrangements()
 
-private fun part2(lines: List<String>) =
-    lines.filter { it.count { it == '?' } == 18}
+}
 
-private data class Record(val pattern: String, val groups: List<Int>)
+data class Record(val pattern: String, val groups: List<Int>)
