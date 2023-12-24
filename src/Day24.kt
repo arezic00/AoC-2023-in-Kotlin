@@ -1,6 +1,3 @@
-import kotlin.math.abs
-import kotlin.math.min
-
 fun main() {
     val input = readInput("Day24")
     val testInput = readInput("Day24_test")
@@ -10,20 +7,22 @@ fun main() {
     check(testResult1 == 2)
     println("Part1 = ${part1(input, 200000000000000, 400000000000000)}")
 
-//    val testResult2 = part2(testInput)
-//    println("\nTest2 = $testResult2")
-//    check(testResult2 == 1)
-//    println("Part2 = ${part2(input)}")
+    val testResult2 = part2(testInput, 5L)
+    println("\nTest2 = $testResult2")
+    check(testResult2 == 47L)
+    println("Part2 = ${part2(input, 100L)}")
 }
 
 fun part1(lines: List<String>, min: Long, max: Long): Int {
-    val hailstones = lines.map { row ->
-        val positions = row.substringBefore(" @").split(", ").map { it.toLong() }
-        val velocities = row.substringAfter("@ ").split(", ").map { it.toLong() }
-        Hailstone(positions[0], positions[1], positions[2], velocities[0], velocities[1], velocities[2])
-    }
+    val hailstones = parse(lines)
 
     return hailstones.sumOf { h1 -> hailstones.count { h2 -> h2.intersectInFutureInBoundary(h1, min, max) } } / 2
+}
+
+private fun parse(lines: List<String>) = lines.map { row ->
+    val positions = row.substringBefore(" @").split(", ").map { it.toLong().toDouble() }
+    val velocities = row.substringAfter("@ ").split(", ").map { it.toLong().toDouble() }
+    Hailstone(positions[0], positions[1], positions[2], velocities[0], velocities[1], velocities[2])
 }
 
 private fun Hailstone.intersectInFutureInBoundary(other: Hailstone, min: Long, max: Long): Boolean {
@@ -59,18 +58,71 @@ private fun Hailstone.intersectInFutureInBoundary(other: Hailstone, min: Long, m
     //x = (b2 - b1) / (m1 -m2)
 }
 
-private fun isInFuture(x: Double, startX: Long, vx: Long) = if (vx < 0) x <= startX else x >= startX
+private fun isInFuture(x: Double, startX: Double, vx: Double) = if (vx < 0) x <= startX else x >= startX
 
-private fun Hailstone.toBoundary(min: Long, max: Long): Hailstone {
+private fun Hailstone.collidesWith(other: Hailstone) : Boolean {
 
-    val tx = if (vx < 0) abs((x - min).toDouble()/vx) else abs((max - x).toDouble()/vx)
-    val ty = if (vy < 0) abs((y - min).toDouble()/vy) else abs((max - y).toDouble()/vy)
-    val time = (min(tx, ty) + 1).toLong()
+    val difX = other.x - this.x
+    val difY = other.y - this.y
+    val difZ = other.z - this.z
 
-    return Hailstone(x + time*vx, y + time*vy, z, vx, vy, vz)
+    val detXY = (other.vx/vx - other.vy/vy)
+    val detXZ = (other.vx/vx - other.vy/vz)
+    val detYZ = (other.vy/vy - other.vz/vz)
+
+    val t2: Double
+    val t1: Double
+
+    if (detXY != 0.0) {
+        t2 = (difY/vy - difX/vx) / detXY
+        t1 = (difX + other.vx*t2) / vx
+    }
+    else if (detXZ != 0.0) {
+        t2 = (difZ/vz - difX/vx) / detXZ
+        t1 = (difX + other.vx*t2) / vx
+    }
+    else if (detYZ != 0.0) {
+        t2 = (difZ/vz - difY/vy) / detYZ
+        t1 = (difY + other.vy*t2) / vy
+    }
+    else return false
+
+    return t1 == (difX + other.vx*t2) / vx && t1 == (difY + other.vy*t2) / vy && t1 == (difZ + other.vz*t2) / vz
+}
+//add map hailstone -> path to reduce computing
+
+
+private fun findRock(hailstones: List<Hailstone>, limit: Long): Hailstone? {
+
+
+    for(vz in -limit..limit) {
+        for (vy in -limit..limit) {
+            for (vx in -limit..limit) {
+                for (hailstone in hailstones) {
+                    val colX = hailstone.x + hailstone.vx
+                    val colY = hailstone.y + hailstone.vy
+                    val colZ = hailstone.z + hailstone.vz
+                    //colX = x + vx -> x = colX - vx
+                    val x = colX - vx
+                    val y = colY - vy
+                    val z = colZ - vz
+                    val rock = Hailstone(x,y,z, vx.toDouble(), vy.toDouble(), vz.toDouble())
+                    if (hailstones.all { rock.collidesWith(it) })
+                        return rock
+                }
+            }
+        }
+    }
+
+    return null
 }
 
-private data class Hailstone(val x: Long, val y: Long, val z: Long, val vx: Long, val vy: Long, val vz: Long)
+private data class Hailstone(val x: Double, val y: Double, val z: Double, val vx: Double, val vy: Double, val vz: Double)
 
-private fun part2(lines: List<String>) =
-    0
+private fun part2(lines: List<String>, limit: Long): Long {
+    val hailstones = parse(lines)
+    val rock = findRock(hailstones, limit)
+    rock?.let { return (rock.x + rock.y + rock.z).toLong() }
+    println("Limit too small, rock not found")
+    return -1L
+}
